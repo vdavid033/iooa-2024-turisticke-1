@@ -1,1 +1,2 @@
-# iooa-2024-turisticke-1
+Valentino Denona
+Niko Gospić
