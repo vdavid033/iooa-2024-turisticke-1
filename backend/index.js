@@ -147,6 +147,19 @@ dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", d
 });
 
 
+//registracija korisnika
+app.post('/dodajKorisnika', (req, res) => {
+  const data = [req.body.Komentar, req.params.id]
+  dbConn.query("INSERT INTO korisnici_test ( email, password) VALUES (?,?)", data,(err,result)=>{
+    if(err){
+      res.send('Error')
+    }else{
+      res.send(result)
+    }
+  })
+  });
+
+
 
 //uzimanje podataka o korisnicima
 app.get("/korisnici", function (request, response) {
@@ -415,5 +428,7 @@ app.listen(4200, function () {
 console.log('Node app is running on port 4200');
 });
 //module.exports = app;
+
+
 
 
