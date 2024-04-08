@@ -14,6 +14,16 @@ const routes = [
     path: "/auth",
     component: () => import("layouts/BlankLayout.vue"),
     children: [
+      { path: "", component: () => import("pages/PrijavaNovo.vue") },
+    ],
+  },
+
+ 
+
+  {
+    path: "/registracijaputanja",
+    component: () => import("layouts/BlankLayout.vue"),
+    children: [
       { path: "", component: () => import("pages/LoginPage.vue") },
     ],
   },

@@ -34,3 +34,27 @@ app.post('/register', (req, res) => {
 app.listen(4200, function () {
     console.log('Node app is running on port 4200');
     });
+
+
+    
+    // Dodajemo endpoint za prijavu
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  // Provjeravamo da li korisnik s navedenim emailom i lozinkom postoji u bazi
+  pool.query('SELECT * FROM korisnici_test WHERE email = ? AND password = ?', [email, password], (error, results, fields) => {
+    if (error) {
+      // U slučaju greške s bazom podataka, šaljemo odgovor s greškom
+      res.status(500).send({ status: 'error', message: 'Greška prilikom prijave.' });
+    } else {
+      // Ako je rezultat prazan, znači da korisnik s tim kredencijalima ne postoji
+      if (results.length > 0) {
+        // Korisnik postoji, šaljemo poruku o uspješnoj prijavi
+        res.send({ status: 'success', message: 'Uspješna prijava.' });
+      } else {
+        // Korisnik ne postoji, šaljemo odgovarajuću poruku
+        res.send({ status: 'failure', message: 'Neispravni kredencijali.' });
+      }
+    }
+  });
+});
