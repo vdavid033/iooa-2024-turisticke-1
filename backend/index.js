@@ -47,12 +47,25 @@ app.use(function (req, res, next) {
 
 app.post('/unosAtrakcija', function (request, response) {
   const data = request.body;
-  atrakcija = [[data.naziv, data.opis, data.slika, data.prosjecna_ocjena, data.geografska_duzina, data.geografska_sirina, data.adresa]]
+  // Dodavanje vrijednosti 1 za id_korisnika na kraj svakog niza atributa atrakcije
+  atrakcija = [
+    [
+      data.naziv, 
+      data.opis, 
+      data.slika, 
+      data.prosjecna_ocjena, 
+      data.geografska_duzina, 
+      data.geografska_sirina, 
+      data.adresa,
+      1 // Ovdje dodajemo id_korisnika sa vrijednošću 1
+    ]
+  ];
   
-  dbConn.query('INSERT INTO atrakcije (naziv, opis, slika, prosjecna_ocjena, geografska_duzina, geografska_sirina, adresa ) VALUES ? ',
+  // Prilagodba SQL upita za uključivanje id_korisnika
+  dbConn.query('INSERT INTO atrakcije (naziv, opis, slika, prosjecna_ocjena, geografska_duzina, geografska_sirina, adresa, id_korisnika) VALUES ?',
   [atrakcija], function (error, results, fields) {
-  if (error) throw error;
-  return response.send({ error: false, data: results, message:'Atrakcija unesena.' });
+    if (error) throw error;
+    return response.send({ error: false, data: results, message: 'Atrakcija unesena.' });
   });
 });
 app.post('/dodavanje_slike', function (request, response) {
@@ -92,7 +105,7 @@ app.post("/api/unos-slike", function (req, res) {
 
 //uzimanje podataka o atrakcijama
 app.get('/atrakcije', (req,res)=>{
-    dbConn.query("select * from atrakcije", (err,result)=>{
+    dbConn.query("SELECT * FROM atrakcije WHERE id_korisnika = 1 ", (err,result)=>{
         if(err){
             res.send('error');
         }else{
@@ -109,6 +122,27 @@ app.get('/slike', (req,res)=>{
       }
   });
 });
+
+//uzimanje podataka o atrakcijama
+app.get('/sveatrakcije', (req,res)=>{
+  dbConn.query("SELECT * FROM atrakcije ", (err,result)=>{
+      if(err){
+          res.send('error');
+      }else{
+          res.send(result);
+      }
+  });
+});
+app.get('/slike', (req,res)=>{
+dbConn.query("select * from slike", (err,result)=>{
+    if(err){
+        res.send('error');
+    }else{
+        res.send(result);
+    }
+});
+});
+
 /// uzimanje podataka o komentarima
 app.get("/komentari", function (request, response) {
   dbConn.query("SELECT * FROM Komentari", function (error, results, fields) {
@@ -222,7 +256,7 @@ app.delete('/obrisi_atrakcije/:id', function (request, response){
       return response.status(400).send({ error: true, message: 'nedostaje id atrakcije' });
     }
   
-   const deleteQuery = "DELETE  FROM atrakcije WHERE id_atrakcije = ?";
+   const deleteQuery = "DELETE FROM atrakcije WHERE id_atrakcije = ? AND id_korisnika = 1   ";
      //const deleteQuery = "DELETE  FROM atrakcije WHERE id_atrakcije = '${id}'";
     dbConn.query(deleteQuery, [id_atrakcije], function (error, results) {
       if (error) {

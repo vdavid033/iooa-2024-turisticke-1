@@ -38,6 +38,13 @@ const linksList = [
     target: "_self",
   },
   {
+    title: "Sve atrakcije",
+    caption: "popis svih atrakcija",
+    icon: "favorite",
+    link: "/sve",
+    target: "_self",
+  },
+  {
     title: "Moje atrakcije",
     caption: "popis mojih atrakcija",
     icon: "favorite",

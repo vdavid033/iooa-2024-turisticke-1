@@ -3,13 +3,14 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
+      { path: "sve", component: () => import("pages/PrikazuSve.vue") },
       { path: "", component: () => import("pages/IndexPage.vue") },
       { path: "unos", component: () => import("pages/Unos_atrakcija.vue")},
       { path: "axo", component: () => import("pages/AxiosPageTest.vue") },
 
     ],
   },
-
+ 
   {
     path: "/auth",
     component: () => import("layouts/BlankLayout.vue"),

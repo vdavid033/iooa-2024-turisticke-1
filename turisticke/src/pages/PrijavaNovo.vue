@@ -5,7 +5,9 @@
     <input type="password" v-model="password" placeholder="Password" class="input-field">
     <button @click="prijava" class="submit-btn">Prijava</button>
     <br>
-        <router-link to="/registracijaputanja" class="submit-btn register-btn">Registracija</router-link>
+  <router-link to="/registracijaputanja" class="submit-btn register-btn" style="text-decoration: none;">Registracija</router-link>
+        <br>
+        <router-link to="/" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
   </div>
 </template>
 
