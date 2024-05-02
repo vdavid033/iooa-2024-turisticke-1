@@ -7,6 +7,8 @@ const app = express();
 var cors = require('cors')
 var bodyParser = require('body-parser');
 //const conn=require('./connection')
+const jwt = require('jsonwebtoken');
+const config = { secret: "YOUR_SECRET_KEY" }; // Ovde ubacite vaš tajni ključ
 
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true})); 
@@ -478,27 +480,41 @@ app.post('/register', (req, res) => {
   });
 });
 
-
+const bcrypt = require('bcrypt');
+const saltRounds = 10; 
 
 
 // Dodajemo endpoint za prijavu
-app.post('/login', (req, res) => {
-  const { email, password } = req.body;
+app.post("/prijavi", function (req, res) {
+  const { korisnicko_ime, lozinka } = req.body;
 
-  // Provjeravamo da li korisnik s navedenim emailom i lozinkom postoji u bazi
-  dbConn.query('SELECT * FROM korisnici_test WHERE email = ? AND password = ?', [email, password], (error, results, fields) => {
-    if (error) {
-      // U slučaju greške s bazom podataka, šaljemo odgovor s greškom
-      res.status(500).send({ status: 'error', message: 'Greška prilikom prijave.' });
-    } else {
-      // Ako je rezultat prazan, znači da korisnik s tim kredencijalima ne postoji
+  dbConn.query(
+    "SELECT * FROM `korisnici_test` WHERE `korisnicko_ime` = ?",
+    [korisnicko_ime],
+    function (error, results) {
+      if (error) {
+        console.error("Error logging in:", error);
+        return res.status(501).send({ error: true, message: "Problem prilikom prijave.", detailedError: error.sqlMessage });
+      }
       if (results.length > 0) {
-        // Korisnik postoji, šaljemo poruku o uspješnoj prijavi
-        res.send({ status: 'success', message: 'Uspješna prijava.' });
+        bcrypt.compare(lozinka, results[0].lozinka, function (err, isMatch) {
+          if (err) {
+            console.error("Error comparing password:", err);
+            console.log(lozinka);
+            console.log(results[0].lozinka);
+            return res.status(500).send({ error: true, message: "Problem prilikom provjere lozinke.", detailedError: err.message });
+          }
+          if (isMatch) {
+            const token = jwt.sign({ id: results[0].id_korisnika, uloga: results[0].uloga }, config.secret, { expiresIn: '24h' });
+            res.status(200).json({ success: true, message: "Login successful", token: token });
+          } else {
+            res.status(401).send({ success: false, message: 'Neispravno korisničko ime ili lozinka.' });
+          }
+        });
       } else {
-        // Korisnik ne postoji, šaljemo odgovarajuću poruku
-        res.send({ status: 'failure', message: 'Neispravni kredencijali.' });
+        res.status(404).send({ success: false, message: 'Korisničko ime nije pronađeno.' });
       }
     }
-  });
+  );
 });
+

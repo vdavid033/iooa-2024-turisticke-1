@@ -3,7 +3,7 @@ const con = mysql.createConnection({
     host: '193.198.97.21',
     user:'iooa-turisticke',
     password:'11', 
-    database:'iooa-turisticke'
+    database:'iooa-turisticke1'
 });
 
 /*con.connect((err)=>{
