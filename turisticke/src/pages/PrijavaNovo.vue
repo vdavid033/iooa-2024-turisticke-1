@@ -1,13 +1,13 @@
 <template>
   <div class="registration-form">
       <h2 class="form-title">Prijava</h2> <!-- Dodajemo naslov forme -->
-    <input type="text" v-model="korisnicko_ime" placeholder="korisnicko_ime" class="input-field">
-    <input type="password" v-model="lozinka" placeholder="lozinka" class="input-field">
+    <input type="text" v-model="korisnicko_ime" placeholder="Korisnicko ime" class="input-field">
+    <input type="password" v-model="lozinka" placeholder="Lozinka" class="input-field">
     <button @click="login" class="submit-btn">Prijava</button>
     <br>
   <router-link to="/registracijaputanja" class="submit-btn register-btn" style="text-decoration: none;">Registracija</router-link>
         <br>
-        <router-link to="/" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
+        <router-link to="/sve" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
   </div>
 </template>
 
@@ -21,7 +21,7 @@ export default {
       lozinka: ''
     };
   },
-   methods: {
+  methods: {
     async login() {
       try {
         const response = await axios.post("http://localhost:4200/prijavi", {
@@ -32,7 +32,8 @@ export default {
         if (response.data.success) {
           // Save the JWT token to local storage
           localStorage.setItem("token", response.data.token);
-
+          // Redirect to the page with path /sve
+          this.$router.push('/sve');
         } else {
           // Show error message if login fails
           this.$q.notify({
@@ -56,6 +57,8 @@ export default {
 };
 </script>
 
+
+
 <style scoped>
 .registration-form {
   display: flex;
@@ -63,7 +66,7 @@ export default {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #blue;
+  background-color: #ffffff;
 }
 
 .input-field {

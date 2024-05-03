@@ -1,12 +1,14 @@
 <template>
   <div class="registration-form">
-      <h2 class="form-title">Registracija</h2> <!-- Dodajemo naslov forme -->
-    <input type="email" v-model="email" placeholder="Email" class="input-field">
-    <input type="password" v-model="password" placeholder="Password" class="input-field">
+    <h2 class="form-title">Registracija</h2> <!-- Dodajemo naslov forme -->
+    <input type="text" v-model="korisnicko_ime" placeholder="Korisnicko ime" class="input-field">
+    <input type="password" v-model="lozinka" placeholder="Lozinka" class="input-field">
     <button @click="register" class="submit-btn">Register</button>
-    
+    <br>
+          <router-link to="/sve" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -14,26 +16,29 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      email: '',
-      password: ''
+      korisnicko_ime: '',
+      lozinka: ''
     };
   },
   methods: {
     register() {
       axios.post('http://localhost:4200/register', {
-        email: this.email,
-        password: this.password
+        korisnicko_ime: this.korisnicko_ime,
+        lozinka: this.lozinka
       })
-      .then(response => {
-        alert(response.data.message);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+        .then(response => {
+          alert(response.data.message);
+          // Preusmjeravanje na /sve nakon uspješne registracije
+          this.$router.push('/sve');
+        })
+        .catch(error => {
+          console.error(error);
+        });
     }
   }
 }
 </script>
+
 
 <style scoped>
 .registration-form {
@@ -42,7 +47,7 @@ export default {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #blue;
+  background-color: #ffffff;
 }
 
 .input-field {

@@ -50,8 +50,6 @@
             {{ post.opis }}
           </div>
         </q-card-section>
-        
-        <!-- Ostatak vašeg koda za karticu... -->
       </q-card>
     </div>
   </div>
@@ -64,14 +62,11 @@ import { api } from "boot/axios";
 export default {
   setup() {
     const posts = ref([]);
-    const pics = ref([]);
 
     const getPosts = async () => {
       try {
         const response = await api.get("sveatrakcije");
-        const response2 = await api.get("slike");
         posts.value = response.data;
-        pics.value = response2.data;
       } catch (error) {
         console.error(error);
       }
@@ -87,16 +82,28 @@ export default {
 
     const deleteById = async (id) => {
       try {
-        const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id}`);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("Token not found. Please log in.");
+          return;
+        }
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+
+        const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id}`, config);
         getPosts(); // Osvježi popis atrakcija nakon brisanja
       } catch (error) {
-        console.error(error);
+        console.error("Failed to delete post:", error);
       }
     };
 
     onMounted(getPosts);
 
-    return { posts, pics, sortPostsAsc, sortPostsDesc, deleteById };
+    return { posts, sortPostsAsc, sortPostsDesc, deleteById };
   },
 };
 </script>

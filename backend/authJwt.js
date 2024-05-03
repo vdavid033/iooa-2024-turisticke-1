@@ -16,6 +16,8 @@ const verifyToken = (roles) => (req, res, next) => {
 
     // Verify the token using the secret key
     jwt.verify(token, config.secret, (err, decoded) => {
+        console.log("Token received:", token);
+
         if (err) {
             return res.status(401).json({
                 message: "Unauthorized!",

@@ -8,7 +8,8 @@ var cors = require('cors')
 var bodyParser = require('body-parser');
 //const conn=require('./connection')
 const jwt = require('jsonwebtoken');
-const config = { secret: "YOUR_SECRET_KEY" }; // Ovde ubacite vaš tajni ključ
+const config = require("./auth.config.js");
+const authJwt = require("./authJwt.js");
 
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true})); 
@@ -247,7 +248,8 @@ app.delete('/atrakcije/id', function (request, response) {
 });*/
 
 
-app.delete('/obrisi_atrakcije/:id', function (request, response){
+
+app.delete('/obrisi_atrakcije/:id', authJwt.verifyToken("admin"), function (request, response){
 
     
     let id_atrakcije = request.params.id;
@@ -258,7 +260,7 @@ app.delete('/obrisi_atrakcije/:id', function (request, response){
       return response.status(400).send({ error: true, message: 'nedostaje id atrakcije' });
     }
   
-   const deleteQuery = "DELETE FROM atrakcije WHERE id_atrakcije = ? AND id_korisnika = 1   ";
+   const deleteQuery = "DELETE FROM atrakcije WHERE id_atrakcije = ? ";
      //const deleteQuery = "DELETE  FROM atrakcije WHERE id_atrakcije = '${id}'";
     dbConn.query(deleteQuery, [id_atrakcije], function (error, results) {
       if (error) {
@@ -470,13 +472,26 @@ console.log('Node app is running on port 4200');
 
 // API endpoint za spremanje emaila i lozinke
 app.post('/register', (req, res) => {
-  const { email, password } = req.body;
-  dbConn.query('INSERT INTO korisnici_test (email, password) VALUES (?, ?)', [email, password], (error, results, fields) => {
-    if (error) {
-      res.status(500).send({ status: 'error', message: 'Greška prilikom registracije.' });
-    } else {
-      res.send({ status: 'success', message: 'Uspješna registracija' });
+  const { korisnicko_ime, lozinka } = req.body;
+  const uloga = 'korisnik';  // Postavljanje default vrijednosti 'korisnik' za uloga
+
+  // Prvo hashiramo lozinku
+  bcrypt.hash(lozinka, saltRounds, function (err, hashedPassword) {
+    if (err) {
+      console.error("Error hashing password:", err);
+      return res.status(500).send({ status: 'error', message: 'Greška prilikom hashiranja lozinke.', error: err.message });
     }
+
+    // Ako nema greške, nastavljamo s upisom u bazu
+    dbConn.query('INSERT INTO korisnici_test (korisnicko_ime, lozinka, uloga) VALUES (?, ?, ?)',
+      [korisnicko_ime, hashedPassword, uloga], (error, results, fields) => {
+        if (error) {
+          console.error("Database error:", error);
+          res.status(500).send({ status: 'error', message: 'Greška prilikom registracije.', error: error.sqlMessage });
+        } else {
+          res.send({ status: 'success', message: 'Uspješna registracija' });
+        }
+      });
   });
 });
 
