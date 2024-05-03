@@ -205,9 +205,22 @@ export default {
         adresa: this.inputAdresa,
       };
       try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("Token not found. Please log in.");
+          return;
+        }
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+
         const response = await axios.post(
           "http://localhost:4200/unosAtrakcija",
-          sampleData
+          sampleData,
+          config // Dodajemo config s tokenom
         );
         console.log(response.data);
         this.showDialog = true;

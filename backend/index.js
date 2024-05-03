@@ -48,7 +48,7 @@ app.use(function (req, res, next) {
 // kraj fix-a
 
 
-app.post('/unosAtrakcija', function (request, response) {
+app.post('/unosAtrakcija', authJwt.verifyToken("admin, korisnik"), function (request, response) {
   const data = request.body;
   // Dodavanje vrijednosti 1 za id_korisnika na kraj svakog niza atributa atrakcije
   atrakcija = [
@@ -172,7 +172,7 @@ dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije=?", id_atrakcije, fu
 });
 // Dodavanje komentara za atrakciju po ID-u
 
-app.post('/dodajKomentar/:id', (req, res) => {
+app.post('/dodajKomentar/:id', authJwt.verifyToken("admin,korisnik"), (req, res) => {
 const data = [req.body.Komentar, req.params.id]
 dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", data,(err,result)=>{
   if(err){
