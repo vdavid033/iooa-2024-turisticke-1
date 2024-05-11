@@ -58,6 +58,7 @@
 <script>
 import { ref, onMounted } from "vue";
 import { api } from "boot/axios";
+import { jwtDecode   } from "jwt-decode"; // Assume this library is already installed
 
 export default {
   setup() {
@@ -80,7 +81,8 @@ export default {
       posts.value.sort((a, b) => b.prosjecna_ocjena - a.prosjecna_ocjena);
     };
 
-    const deleteById = async (id) => {
+
+    const deleteById = async (id_atrakcije) => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -88,18 +90,28 @@ export default {
           return;
         }
 
+        // Decode the JWT token to get user details
+        const decodedToken = jwtDecode(token);
+        const id_korisnika = decodedToken.id 
+        const uloga = decodedToken.uloga
+
         const config = {
           headers: {
             Authorization: `Bearer ${token}`
+          },
+          params: {
+            id_korisnika, // Pass the user ID to the backend
+            uloga
           }
         };
 
-        const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id}`, config);
-        getPosts(); // Osvježi popis atrakcija nakon brisanja
+        const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id_atrakcije}`, config);
+        getPosts(); // Refresh the attraction list after deletion
       } catch (error) {
         console.error("Failed to delete post:", error);
       }
     };
+
 
     onMounted(getPosts);
 

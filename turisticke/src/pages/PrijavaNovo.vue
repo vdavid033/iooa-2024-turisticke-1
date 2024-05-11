@@ -7,7 +7,7 @@
     <br>
   <router-link to="/registracijaputanja" class="submit-btn register-btn" style="text-decoration: none;">Registracija</router-link>
         <br>
-        <router-link to="/sve" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
+        <router-link to="/" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
   </div>
 </template>
 
@@ -32,8 +32,7 @@ export default {
         if (response.data.success) {
           // Save the JWT token to local storage
           localStorage.setItem("token", response.data.token);
-          // Redirect to the page with path /sve
-          this.$router.push('/sve');
+          this.$router.push('/');
         } else {
           // Show error message if login fails
           this.$q.notify({

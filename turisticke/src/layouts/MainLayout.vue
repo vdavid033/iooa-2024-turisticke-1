@@ -7,10 +7,12 @@
         <q-toolbar-title>
           <div class="text-h6"><b>Turističke atrakcije</b></div>
         </q-toolbar-title>
+  <q-toolbar-title>
+              <div class="text-h6"><b> Prijavljeni ste kao: </b>{{ userRole }}</div>
 
+          </q-toolbar-title>
         <div>Bad Developers</div>
 
-        <!-- Dodani gumb za brisanje lokalnog skladišta -->
         <q-btn flat icon="logout" label="ODJAVA" @click="clearLocalStorage" />
       </q-toolbar>
     </q-header>
@@ -28,10 +30,10 @@
   </q-layout>
 </template>
 
-
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { jwtDecode }  from 'jwt-decode'; // Uvoz jwt-decode biblioteke
 
 const linksList = [
   {
@@ -44,14 +46,14 @@ const linksList = [
     title: "Sve atrakcije",
     caption: "popis svih atrakcija",
     icon: "favorite",
-    link: "/sve",
+    link: "/",
     target: "_self",
   },
   {
     title: "Moje atrakcije",
     caption: "popis mojih atrakcija",
     icon: "favorite",
-    link: "/",
+    link: "/index",
     target: "_self",
   },
   {
@@ -68,7 +70,6 @@ const linksList = [
     link: "axo",
     target: "_self",
   },
-
 ];
 
 export default defineComponent({
@@ -76,13 +77,38 @@ export default defineComponent({
   components: {
     EssentialLink,
   },
+
+
+
   setup() {
     const leftDrawerOpen = ref(false);
+    const userRole = ref(""); // Ref za pohranu korisničke uloge
 
     function clearLocalStorage() {
       localStorage.clear();
+      window.location.reload();
+
       console.log("Local storage is cleared."); // Opcionalno: Poruka u konzoli
     }
+
+    function getUserRole() {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      userRole.value = decoded.uloga; // Postavi korisničku ulogu
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      userRole.value = "Niste prijavljeni"; // Ako dođe do greške prilikom dekodiranja tokena
+    }
+  } else {
+    userRole.value = "Niste prijavljeni"; // Ako token ne postoji
+  }
+}
+
+
+    // Osvježi korisničku ulogu prilikom inicijalizacije komponente
+    onMounted(getUserRole);
 
     return {
       essentialLinks: linksList,
@@ -91,6 +117,7 @@ export default defineComponent({
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
       clearLocalStorage,
+      userRole, // Dostupno u templateu
     };
   },
 });

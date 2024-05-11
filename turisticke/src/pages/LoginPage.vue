@@ -5,7 +5,7 @@
     <input type="password" v-model="lozinka" placeholder="Lozinka" class="input-field">
     <button @click="register" class="submit-btn">Register</button>
     <br>
-          <router-link to="/sve" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
+          <router-link to="/" class="submit-btn register-btn" style="text-decoration: none;">Odustani</router-link>
   </div>
 </template>
 
@@ -28,8 +28,7 @@ export default {
       })
         .then(response => {
           alert(response.data.message);
-          // Preusmjeravanje na /sve nakon uspješne registracije
-          this.$router.push('/sve');
+          this.$router.push('/');
         })
         .catch(error => {
           console.error(error);
