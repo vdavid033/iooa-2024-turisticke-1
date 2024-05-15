@@ -136,16 +136,10 @@ app.get('/atrakcije', (req, res) => {
 });
 
 
-app.get('/atrakcije/:id', (req, res) => {
+app.get('/natrakcije/:id', (req, res) => {
   const { id } = req.params;
-  const idKorisnika = req.query.id_korisnika;
   console.log("Request received for ID:", req.params.id);
-  console.log("Request received for ID korisnika:", req.query.id_korisnika);
 
-
-  if (!idKorisnika) {
-    return res.status(400).send({ error: 'ID korisnika je potreban' });
-  }
 
   dbConn.query("SELECT * FROM atrakcije WHERE id_atrakcije = ? ", [id], (err, result) => {
     if (err) {
@@ -190,40 +184,42 @@ dbConn.query("select * from slike", (err,result)=>{
 });
 
 /// uzimanje podataka o komentarima
-app.get("/komentari", function (request, response) {
-  dbConn.query("SELECT * FROM Komentari", function (error, results, fields) {
-      if (error) throw error;
-      return response.send({
-          error: false,
-          data: results,
-          message: "lista komentara.",
-      });
+app.get("/komentari", (request, response) => {
+  dbConn.query("SELECT * FROM Komentari", (error, results, fields) => {
+    if (error) throw error;
+    return response.send({
+      error: false,
+      data: results,
+      message: "lista komentara.",
+    });
   });
 });
 
-
-app.get('/komentari/:id', function (request, response) {
-let id_atrakcije = request.params.id;
-dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije=?", id_atrakcije, function (error, results, fields) {
+app.get('/komentari/:id', (request, response) => {
+  let id_atrakcije = request.params.id;
+  dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije = ?", [id_atrakcije], (error, results, fields) => {
     if (error) throw error;
     return response.send({
-        error: false,
-        data: results,
-        message: "lista komentara.",
+      error: false,
+      data: results,
+      message: "lista komentara.",
     });
-});
+  });
 });
 // Dodavanje komentara za atrakciju po ID-u
 
-app.post('/dodajKomentar/:id', authJwt.verifyToken("admin,korisnik"), (req, res) => {
-const data = [req.body.Komentar, req.params.id]
-dbConn.query("INSERT INTO Komentari( Komentar, VK_ID_atrakcije) VALUES (?,?)", data,(err,result)=>{
-  if(err){
-    res.send('Error')
-  }else{
-    res.send(result)
-  }
-})
+app.post('/dodajKomentar/:id', (req, res) => {
+  const data = [req.body.Komentar, req.params.id];
+  console.log('Received data:', data);  // Log the received data
+  dbConn.query("INSERT INTO Komentari(Komentar, VK_ID_atrakcije) VALUES (?,?)", data, (err, result) => {
+    if (err) {
+      console.error('Error inserting data:', err);  // Log the error
+      res.status(500).send('Error');
+    } else {
+      console.log('Insert result:', result);  // Log the result
+      res.send(result);
+    }
+  });
 });
 
 

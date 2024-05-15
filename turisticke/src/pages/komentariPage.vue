@@ -38,6 +38,8 @@ const dodajKomentar = async (komentar, trenutniID) => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("Token not found. Please log in.");
+          message.value = 'Potrebno se prijaviti za dodavanje komentara!';
+
       return;
     }
 
