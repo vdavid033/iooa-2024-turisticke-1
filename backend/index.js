@@ -197,6 +197,7 @@ app.get("/komentari", (request, response) => {
 
 app.get('/komentari/:id', (request, response) => {
   let id_atrakcije = request.params.id;
+  console.log("Id atrakcije: " + id_atrakcije);
   dbConn.query("SELECT * FROM Komentari WHERE VK_ID_atrakcije = ?", [id_atrakcije], (error, results, fields) => {
     if (error) throw error;
     return response.send({

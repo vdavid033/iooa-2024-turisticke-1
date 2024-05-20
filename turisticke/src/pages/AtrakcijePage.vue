@@ -147,11 +147,11 @@ const router = useRouter()
 
 const trenutniID = route.params.id
 const getPosts = async () => {
-  
+
 
   try {
     const response = await api.get(`/natrakcije/${trenutniID}`, {
-      
+
     });
     posts.value = response.data ? [response.data] : []; // Ensure posts is always an array
   } catch (error) {
@@ -210,9 +210,20 @@ const deleteOcjena = async (id) => {
   getPosts();
 }
 
-onMounted(() => {
-  getPosts()
-})
+onMounted(async () => {
+  await getPosts();
+  await getComments();
+  initMap();
+});
+
+const getComments = async () => {
+  try {
+    const response = await api.get(`/komentari/${trenutniID}`);
+    comments.value = response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch comments:", error);
+  }
+};
 </script>
 
 <style scoped></style>
@@ -238,4 +249,6 @@ onMounted(() => {
   background-color: white;
   color: black;
 }
+
+
 </style>
