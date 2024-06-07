@@ -95,6 +95,9 @@
       </div>
     </div>
 
+    <!-- Add map container -->
+    <div id="mapid" style="height: 300px; margin: 20px;"></div>
+
     <q-card-section>
       <q-btn class="button" @click="$router.push('/')" label="Natrag na početnu" />
     </q-card-section>
@@ -139,6 +142,8 @@ import { ref, onMounted } from "vue"
 import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router';
 import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
+import L from 'leaflet'; // Import Leaflet
+import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
 const posts = ref([])
 const comments = ref([])
@@ -147,7 +152,6 @@ const router = useRouter()
 
 const trenutniID = route.params.id
 const getPosts = async () => {
-
 
   try {
     const response = await api.get(`/natrakcije/${trenutniID}`, {
@@ -224,6 +228,38 @@ const getComments = async () => {
     console.error("Failed to fetch comments:", error);
   }
 };
+
+// Initialize map
+const initMap = () => {
+  const map = L.map('mapid').setView([45.9258, 16.0400], 3); // Center on Europe
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  const icon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/0/619.png',
+    iconSize: [15, 30],
+    iconAnchor: [9, 30],
+    popupAnchor: [-3, -76]
+  });
+
+  // Set marker based on post data
+  if (posts.value.length > 0) {
+    const post = posts.value[0];
+    const lat = post.geografska_sirina;
+    const lng = post.geografska_duzina;
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+
+    // Center and zoom the map to the marker
+    map.setView([lat, lng], 18); // Adjust the zoom level as needed
+  }
+
+  // Handle click event on the map
+  map.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    // Update lat/lng based on map click if necessary
+  });
+}
 </script>
 
 <style scoped></style>
@@ -250,5 +286,7 @@ const getComments = async () => {
   color: black;
 }
 
-
+#mapid {
+  height: 300px;
+}
 </style>
