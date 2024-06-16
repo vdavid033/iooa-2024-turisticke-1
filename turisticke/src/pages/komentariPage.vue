@@ -1,45 +1,40 @@
 <template>
   <div style="background-color: #229df9;">
 
-  <h3>Unos komentara</h3>
-  <h6>U polje ispod upišite svoj komentar o atrakciji</h6>
-  <div class="q-pa-md row items-start q-gutter-md">
+    <h3>Unos komentara</h3>
+    <h6>U polje ispod upišite svoj komentar o atrakciji</h6>
+    <div class="q-pa-md row items-start q-gutter-md">
       <q-input class="textarea" outlined v-model="komentar" label="Unesi svoj komentar.. " :dense="dense" />
-  </div>
+    </div>
     <q-card-section>
-            <q-btn label="Dodaj komentar" @click="dodajKomentar(komentar, trenutniID)" />
-        </q-card-section>
+      <q-btn label="Dodaj komentar" @click="dodajKomentar(komentar, trenutniID)" />
+    </q-card-section>
 
-
-  <q-card-section>
-      <q-btn color="#4CAF50" @click="$router.push('/')" label="Natrag na početnu" />
+    <q-card-section>
+      <q-btn color="#4CAF50" @click="nazadNaPrethodnu" label="Natrag na atrakciju" />
     </q-card-section>
 
     <p>{{ message }}</p>
   </div>
 </template>
-
 <script setup>
-import { ref, onMounted } from "vue"
-import { api } from 'boot/axios'
-
+import { ref, onMounted } from "vue";
+import { api } from 'boot/axios';
 import { useRoute, useRouter } from 'vue-router';
 
-const posts = ref([])
-const route = useRoute()
-const router = useRouter()
-const trenutniID = route.params.id
+const route = useRoute();
+const router = useRouter();
+const trenutniID = route.params.id;
 const message = ref('');
+const komentar = ref('');
 
-//Dodavanje komentara za atrakciju
-
+// Dodavanje komentara za atrakciju
 const dodajKomentar = async (komentar, trenutniID) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("Token not found. Please log in.");
-          message.value = 'Potrebno se prijaviti za dodavanje komentara!';
-
+      message.value = 'Potrebno se prijaviti za dodavanje komentara!';
       return;
     }
 
@@ -51,15 +46,24 @@ const dodajKomentar = async (komentar, trenutniID) => {
 
     const response = await api.post(`http://localhost:4200/dodajKomentar/${trenutniID}`, {
       Komentar: komentar
-    }, config); // Dodajemo config s tokenom
-    console.log(response.data);
+    }, config);
 
+    console.log(response.data);
     message.value = 'Uspješno ste dodali komentar!';
+    // Vraćamo korisnika na prethodnu stranicu
+    nazadNaPrethodnu();
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    message.value = 'Dogodila se greška pri dodavanju komentara.';
   }
 };
+
+const nazadNaPrethodnu = () => {
+  router.go(-1);
+};
 </script>
+
+
 
 
 <style scoped>

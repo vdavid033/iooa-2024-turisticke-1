@@ -3,23 +3,19 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-
         <q-toolbar-title>
           <div class="text-h6"><b>Turističke atrakcije</b></div>
         </q-toolbar-title>
-  <q-toolbar-title>
-              <div class="text-h6"><b> Prijavljeni ste kao: </b>{{ userRole }}</div>
-
-          </q-toolbar-title>
-        <div>Bad Developers</div>
-
-        <q-btn flat icon="logout" label="ODJAVA" @click="clearLocalStorage" />
+        <q-toolbar-title>
+          <div class="text-h6"><b>Prijavljeni ste kao:</b>{{ userRole }}</div>
+        </q-toolbar-title>
+        <q-btn flat icon="logout" label="ODJAVA" v-if="tokenExists" @click="clearLocalStorage" />
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Izbornik </q-item-label>
+        <q-item-label header>Izbornik</q-item-label>
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>
@@ -31,9 +27,9 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
-import { jwtDecode }  from 'jwt-decode'; // Uvoz jwt-decode biblioteke
+import { jwtDecode } from 'jwt-decode';
 
 const linksList = [
   {
@@ -41,6 +37,8 @@ const linksList = [
     icon: "login",
     link: "auth",
     target: "_self",
+    requiresAuth: false,
+    hideOnAuth: true,  // Dodan novi atribut za skrivanje na autentikaciji
   },
   {
     title: "Sve atrakcije",
@@ -48,6 +46,8 @@ const linksList = [
     icon: "favorite",
     link: "/",
     target: "_self",
+    requiresAuth: false,
+    hideOnAuth: false,  // Atribut za uvjetno skrivanje
   },
   {
     title: "Moje atrakcije",
@@ -55,6 +55,8 @@ const linksList = [
     icon: "favorite",
     link: "/index",
     target: "_self",
+    requiresAuth: true,
+    hideOnAuth: false,
   },
   {
     title: "Unos atrakcija",
@@ -62,13 +64,8 @@ const linksList = [
     icon: "swap_horizontal_circle",
     link: "unos",
     target: "_self",
-  },
-  {
-    title: "Testiranje Axiosa",
-    caption: "služi za testiranje Axiosa",
-    icon: "swap_horizontal_circle",
-    link: "axo",
-    target: "_self",
+    requiresAuth: true,
+    hideOnAuth: false,
   },
 ];
 
@@ -77,47 +74,51 @@ export default defineComponent({
   components: {
     EssentialLink,
   },
-
-
-
   setup() {
     const leftDrawerOpen = ref(false);
-    const userRole = ref(""); // Ref za pohranu korisničke uloge
+    const userRole = ref("");
+    const tokenExists = ref(false);
 
     function clearLocalStorage() {
       localStorage.clear();
       window.location.reload();
-
-      console.log("Local storage is cleared."); // Opcionalno: Poruka u konzoli
     }
 
     function getUserRole() {
-  const token = localStorage.getItem('token');
-  if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      userRole.value = decoded.uloga; // Postavi korisničku ulogu
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      userRole.value = "Niste prijavljeni"; // Ako dođe do greške prilikom dekodiranja tokena
+      const token = localStorage.getItem('token');
+      tokenExists.value = !!token;
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          userRole.value = decoded.uloga;
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          userRole.value = "Niste prijavljeni";
+        }
+      } else {
+        userRole.value = "Niste prijavljeni";
+      }
     }
-  } else {
-    userRole.value = "Niste prijavljeni"; // Ako token ne postoji
-  }
-}
 
+    const filteredLinks = computed(() => {
+      return linksList.filter(link => {
+        if (link.requiresAuth && !tokenExists.value) return false;
+        if (link.hideOnAuth && tokenExists.value) return false;
+        return true;
+      });
+    });
 
-    // Osvježi korisničku ulogu prilikom inicijalizacije komponente
     onMounted(getUserRole);
 
     return {
-      essentialLinks: linksList,
+      essentialLinks: filteredLinks,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
       },
       clearLocalStorage,
-      userRole, // Dostupno u templateu
+      userRole,
+      tokenExists,
     };
   },
 });

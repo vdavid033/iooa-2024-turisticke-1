@@ -21,7 +21,6 @@
 
                 <div>
                   <input type="file" @change="onFileChange" />
-                  <q-btn @click="convertImage">Spremi sliku</q-btn>
                   <q-separator></q-separator>
                   <div v-if="base64Image">
                     <img :src="base64Image" />

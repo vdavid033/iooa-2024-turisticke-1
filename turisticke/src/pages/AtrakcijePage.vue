@@ -11,9 +11,7 @@
               <q-list>
                 <q-item-section>
                   <q-form @click="spremiSliku(name, post.id_atrakcije)" class="q-gutter-md">
-                    <q-input class="bg-light-blue-11" filled v-model="name" label="Zalijepi link nove slike" />
                     <div style="display: flex; justify-content: center; align-items: center;">
-                      <q-btn class="" label="Spremi sliku" type="submit" color="primary" />
                     </div>
                   </q-form>
                 </q-item-section>
@@ -96,14 +94,14 @@
     </div>
 
     <!-- Add map container -->
-    <div id="mapid" style="height: 300px; margin: 20px;"></div>
+    <div id="mapid" style="height: 500px; margin: 20px;"></div>
 
     <q-card-section>
       <q-btn class="button" @click="$router.push('/')" label="Natrag na početnu" />
     </q-card-section>
     <q-card-section>
-      <q-btn class="button" :to="'/komentari/' + trenutniID" label="Dodaj komentar" />
-    </q-card-section>
+    <q-btn class="button" :to="'/komentari/' + trenutniID" label="Dodaj komentar" v-if="hasToken" />
+      </q-card-section>
 
     <q-separator />
 
@@ -138,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router';
 import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
@@ -151,6 +149,10 @@ const route = useRoute()
 const router = useRouter()
 
 const trenutniID = route.params.id
+
+const hasToken = computed(() => {
+  return localStorage.getItem('token') !== null;
+});
 const getPosts = async () => {
 
   try {
@@ -251,7 +253,7 @@ const initMap = () => {
     const marker = L.marker([lat, lng], { icon }).addTo(map);
 
     // Center and zoom the map to the marker
-    map.setView([lat, lng], 18); // Adjust the zoom level as needed
+    map.setView([lat, lng], 13); // Adjust the zoom level as needed
   }
 
   // Handle click event on the map
