@@ -23,7 +23,6 @@
                   <input type="file" @change="onFileChange" />
                   <q-separator></q-separator>
                   <div v-if="base64Image">
-                    <img :src="base64Image" />
                     <q-separator></q-separator>
                   </div>
                 </div>

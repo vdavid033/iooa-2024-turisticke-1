@@ -1,11 +1,13 @@
 <template>
   <div style="background-color: #229df9">
-    <div class="q-pa-md row items-start q-gutter-md">
-      <!-- Gumbi za sortiranje -->
-      <div class="row justify-center q-pa-md">
-        <q-btn label="Sortiraj uzlazno" @click="sortPostsAsc" color="green" class="q-mr-sm" />
-        <q-btn label="Sortiraj silazno" @click="sortPostsDesc" color="orange" />
+    <div class="q-pa-md">
+        <div class="row justify-center">
+          <q-btn label="Sortiraj uzlazno" @click="sortPostsAsc" color="green" class="q-mr-sm" />
+          <q-btn label="Sortiraj silazno" @click="sortPostsDesc" color="orange" />
+        </div>
       </div>
+    <div class="q-pa-md row items-start q-gutter-md">
+     
 
       <!-- Kartice atrakcija -->
       <q-card v-for="post in posts" :key="post.id" class="my-card">
@@ -94,6 +96,11 @@ export default {
 
     const deleteById = async (id_atrakcije) => {
       try {
+        const confirmation = window.confirm("Jeste li sigurni da želite izbrisati atrakciju?");
+        if (!confirmation) {
+          return; // If the user cancels, do nothing
+        }
+
         const token = localStorage.getItem("token");
         if (!token) {
           console.error("Token not found. Please log in.");
@@ -102,8 +109,8 @@ export default {
 
         // Decode the JWT token to get user details
         const decodedToken = jwtDecode(token);
-        const id_korisnika = decodedToken.id
-        const uloga = decodedToken.uloga
+        const id_korisnika = decodedToken.id;
+        const uloga = decodedToken.uloga;
 
         const config = {
           headers: {
@@ -117,6 +124,7 @@ export default {
 
         const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id_atrakcije}`, config);
         getPosts(); // Refresh the attraction list after deletion
+        window.alert("Atrakcija je izbrisana."); // Display success message
       } catch (error) {
         console.error("Failed to delete post:", error);
       }

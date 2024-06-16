@@ -6,14 +6,14 @@
         <q-toolbar-title>
           <div class="text-h6"><b>Turističke atrakcije</b></div>
         </q-toolbar-title>
-        <q-toolbar-title>
+        <q-toolbar-title v-if="tokenExists">
           <div class="text-h6"><b>Prijavljeni ste kao:</b>{{ userRole }}</div>
         </q-toolbar-title>
         <q-btn flat icon="logout" label="ODJAVA" v-if="tokenExists" @click="clearLocalStorage" />
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list>
         <q-item-label header>Izbornik</q-item-label>
         <EssentialLink v-for="link in essentialLinks" :key="link.title" v-bind="link" />
