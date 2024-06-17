@@ -9,7 +9,7 @@
           <div class="absolute-bottom text-subtitle1 text-center">
             <div style="text-transform:uppercase; font-size:50px;">
               {{ post.naziv }}
-              <q-icon name="edit" @click="showEditDialog('naziv', post)" style="cursor: pointer; float: right;"></q-icon>
+              <q-icon name="edit" v-if="canEdit(post.id_korisnika)" @click="showEditDialog('naziv', post)" style="cursor: pointer; float: right;"></q-icon>
             </div>
           </div>
         </q-img>
@@ -18,13 +18,13 @@
       <div class="q-pa-md">
         <div class="q-pa-md items-start q-gutter-xs" style="background-color: black; color: white;">
           <p style="font-size: 20px;">Opis:
-            <q-icon name="edit" @click="showEditDialog('opis', post)" style="cursor: pointer; float: right;"></q-icon>
+            <q-icon name="edit" v-if="canEdit(post.id_korisnika)" @click="showEditDialog('opis', post)" style="cursor: pointer; float: right;"></q-icon>
           </p>
 
           <div class="post-text">{{ post.opis }}</div>
           <q-separator color="white" />
           <p style="font-size: 20px;">Adresa:
-            <q-icon name="edit" @click="showEditDialog('adresa', post)" style="cursor: pointer; float: right;"></q-icon>
+            <q-icon name="edit" v-if="canEdit(post.id_korisnika)" @click="showEditDialog('adresa', post)" style="cursor: pointer; float: right;"></q-icon>
           </p>
 
           <h7>{{ post.adresa }}</h7>
@@ -33,10 +33,10 @@
           <q-rating @click="dodajOcjenu(post.id_atrakcije, post.prosjecna_ocjena)" v-model="post.prosjecna_ocjena"
             :max="5" :readonly="true" size="32px" />
 
-          <q-btn round color="black" icon="delete" style="right: -12px" @click="deleteOcjena(post.id_atrakcije)" />
+          <q-btn round color="black" icon="delete" style="right: -12px" v-if="canEdit(post.id_korisnika)" @click="deleteOcjena(post.id_atrakcije)" />
 
           <div class="q-pa-md">
-            <q-btn-dropdown color="primary" label="Promijeni ocjenu">
+            <q-btn-dropdown color="primary" v-if="canEdit(post.id_korisnika)" label="Promijeni ocjenu">
               <q-list>
                 <q-item clickable v-close-popup @click="dodajOcjenu(1, post.id_atrakcije)">
                   <q-item-section>
@@ -70,7 +70,7 @@
             </q-btn-dropdown>
           </div>
 
-          <q-btn @click="showEditImageDialog(post)" label="Promijeni sliku" color="primary" style="margin-left: 40px;" />
+          <q-btn @click="showEditImageDialog(post)" v-if="canEdit(post.id_korisnika)" label="Promijeni sliku" color="primary" style="margin-left: 40px;" />
 
           <q-separator color="white" />
 
@@ -165,8 +165,23 @@ import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router';
 import L from 'leaflet'; // Import Leaflet
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
+import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
 
 const posts = ref([])
+const token = localStorage.getItem('token');
+let loggedInUserId = 0; // Set default to 0
+
+if (token) {
+  const decoded = jwtDecode(token);
+  loggedInUserId = decoded.id; // Adjust this to match the key in your token payload where the user ID is stored
+}
+// Adjust this according to your token structure
+
+// Computed property to check if the user can edit
+const canEdit = (postCreatorId) => {
+  return loggedInUserId === postCreatorId;
+};
+
 const comments = ref([])
 const route = useRoute()
 const router = useRouter()
@@ -196,18 +211,51 @@ const getPosts = async () => {
 // Dodavanje ocjene za atrakciju
 const dodajOcjenu = async (ocjena, id) => {
   try {
+    console.log('Kliknuli ste na: ', ocjena, " ocjenu");
+    console.log("ID: ", id);
+
+    // Retrieve the token from localStorage
+    const token = localStorage.getItem('token');
+
+    // Decoding the JWT to extract user information
+    const decoded = jwtDecode(token);
+    const userId = decoded.id;  // Assuming 'id' is the key containing the user ID in your JWT payload
+
+    // Log the user ID to console
+    console.log("User ID extracted from token:", userId);
+
     const response = await api.put(`http://localhost:4200/dodajOcjenu/${id}`, {
-      prosjecna_ocjena: ocjena
+      prosjecna_ocjena: ocjena,
+      id_korisnika: userId  // Sending the user ID to the backend
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`  // Sending token in the Authorization header
+      }
     });
+
+    if (response.status === 403) {
+      alert('Unauthorized: You are not authorized to update this rating.');
+    } else {
+      console.log(response.data);
+    }
   } catch (error) {
-    console.log(error);
+    if (error.response && error.response.status === 403) {
+    } else {
+      console.log(error);
+    }
   }
   getPosts();
 }
 
 const deleteOcjena = async (id) => {
   try {
-    const response = await api.delete(`http://localhost:4200/obrisi_ocjenu_atrakcije/${id}`);
+    const token = localStorage.getItem('token');
+    const decoded = jwtDecode(token);
+    const userId = decoded.id;
+    console.log("User ID extracted from token:", userId);
+
+    const response = await api.delete(`http://localhost:4200/obrisi_ocjenu_atrakcije/${id}/${userId}`);
+    console.log(response.data);
   } catch (error) {
     console.log(error);
   }
