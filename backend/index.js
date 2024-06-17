@@ -33,7 +33,28 @@ var dbConn = mysql.createConnection({
 //spajanje s bazom
 dbConn.connect();
 
+const multer = require('multer');
 
+// Konfiguriranje multer-a bez specificiranja storage engine-a
+const upload = multer();
+
+app.put('/updateImage/:id', (req, res) => {
+  const { id } = req.params;
+  const { slika } = req.body; // Pretpostavljamo da 'slika' dolazi kao base64 string
+
+  if (!slika) {
+    return res.status(400).send({ error: true, message: 'Slika je potrebna.' });
+  }
+
+  const updateQuery = "UPDATE atrakcije SET slika = ? WHERE id_atrakcije = ?";
+  dbConn.query(updateQuery, [slika, id], (err, result) => {
+    if (err) {
+      console.error('Error updating image:', err);
+      return res.status(500).send({ error: true, message: 'Došlo je do pogreške prilikom ažuriranja slike.' });
+    }
+    res.send({ error: false, data: result, message: 'Slika uspješno ažurirana.' });
+  });
+});
 
 
 
@@ -448,6 +469,50 @@ app.get('/atrakcijeProsjecneOcjene/:id', (req, res) => {
       return response.send({ error: false, data: results, message: 'slika atrakcija je obrisana ' });
     });
   });*/
+
+// Endpoint za ažuriranje naziva, opisa i adrese
+app.put('/updatePost/:id', (req, res) => {
+  const { id } = req.params;
+  const { naziv, opis, adresa } = req.body;
+
+  // Dinamičko sastavljanje SQL upita i vrijednosti
+  let updateFields = [];
+  let updateValues = [];
+
+  if (naziv !== undefined) {
+    updateFields.push("naziv = ?");
+    updateValues.push(naziv);
+  }
+  if (opis !== undefined) {
+    updateFields.push("opis = ?");
+    updateValues.push(opis);
+  }
+  if (adresa !== undefined) {
+    updateFields.push("adresa = ?");
+    updateValues.push(adresa);
+  }
+
+  // Ako nema polja za ažuriranje, vrati grešku
+  if (updateFields.length === 0) {
+    return res.status(400).send({ error: true, message: 'Nema polja za ažuriranje' });
+  }
+
+  // Dodavanje ID atrakcije na kraj niza vrijednosti
+  updateValues.push(id);
+
+  const updateQuery = `UPDATE atrakcije SET ${updateFields.join(", ")} WHERE id_atrakcije = ?`;
+  dbConn.query(updateQuery, updateValues, (err, result) => {
+    if (err) {
+      console.error('Error updating attraction:', err);
+      return res.status(500).send({ error: true, message: 'Došlo je do pogreške prilikom ažuriranja atrakcije.' });
+    }
+    res.send({ error: false, data: result, message: 'Atrakcija uspješno ažurirana.' });
+  });
+});
+
+
+
+
 
 
   app.delete('/obrisi_ocjenu_atrakcije/:id', function (request, response){

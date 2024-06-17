@@ -6,37 +6,27 @@
 
         <q-img :src="post.slika" width="800px" height="600px" position="absolute" top="50%" left="50%"
           transform="translate(-50%, -50%)">
-          <div class="q-pa-md">
-            <q-btn-dropdown color="black" label="Uredi sliku">
-              <q-list>
-                <q-item-section>
-                  <q-form @click="spremiSliku(name, post.id_atrakcije)" class="q-gutter-md">
-                    <div style="display: flex; justify-content: center; align-items: center;">
-                    </div>
-                  </q-form>
-                </q-item-section>
-
-                <q-item clickable v-close-popup @click="obrisi_sliku(post.id_atrakcije)">
-                  <q-item-section>
-                    <q-item-label style="display: flex; justify-content: center; align-items: center;">OBRIŠI
-                      SLIKU</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
-          </div>
           <div class="absolute-bottom text-subtitle1 text-center">
-            <div style="text-transform:uppercase; font-size:50px">{{ post.naziv }}</div>
+            <div style="text-transform:uppercase; font-size:50px;">
+              {{ post.naziv }}
+              <q-icon name="edit" @click="showEditDialog('naziv', post)" style="cursor: pointer; float: right;"></q-icon>
+            </div>
           </div>
         </q-img>
       </div>
 
       <div class="q-pa-md">
         <div class="q-pa-md items-start q-gutter-xs" style="background-color: black; color: white;">
-          <p style="font-size: 20px;">Opis:</p>
+          <p style="font-size: 20px;">Opis:
+            <q-icon name="edit" @click="showEditDialog('opis', post)" style="cursor: pointer; float: right;"></q-icon>
+          </p>
+
           <div class="post-text">{{ post.opis }}</div>
           <q-separator color="white" />
-          <p style="font-size: 20px;">Adresa:</p>
+          <p style="font-size: 20px;">Adresa:
+            <q-icon name="edit" @click="showEditDialog('adresa', post)" style="cursor: pointer; float: right;"></q-icon>
+          </p>
+
           <h7>{{ post.adresa }}</h7>
           <q-separator color="white" />
           <p style="font-size: 20px;">Ocjena:</p>
@@ -80,6 +70,8 @@
             </q-btn-dropdown>
           </div>
 
+          <q-btn @click="showEditImageDialog(post)" label="Promijeni sliku" color="primary" style="margin-left: 40px;" />
+
           <q-separator color="white" />
 
           <div class="" style="max-width: 400px"></div>
@@ -100,8 +92,8 @@
       <q-btn class="button" @click="$router.push('/')" label="Natrag na početnu" />
     </q-card-section>
     <q-card-section>
-    <q-btn class="button" :to="'/komentari/' + trenutniID" label="Dodaj komentar" v-if="hasToken" />
-      </q-card-section>
+      <q-btn class="button" :to="'/komentari/' + trenutniID" label="Dodaj komentar" v-if="hasToken" />
+    </q-card-section>
 
     <q-separator />
 
@@ -132,6 +124,38 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <!-- Edit Dialog -->
+    <q-dialog v-model="showDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">{{ editField === 'naziv' ? 'Uredi naziv' : editField === 'opis' ? 'Uredi opis' : 'Uredi adresu' }}</div>
+        </q-card-section>
+        <q-card-section>
+          <q-input v-model="editValue" label="Tekst:" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Odustani" v-close-popup />
+          <q-btn flat label="Spremi" @click="saveEdit" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Dialog za promjenu slike -->
+    <q-dialog v-model="showImageDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Promijeni sliku</div>
+        </q-card-section>
+        <q-card-section>
+          <input type="file" @change="onFileChange" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Odustani" v-close-popup />
+          <q-btn flat label="Spremi" @click="saveImage" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -139,7 +163,6 @@
 import { ref, onMounted, computed } from "vue"
 import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router';
-import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
 import L from 'leaflet'; // Import Leaflet
 import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
 
@@ -148,60 +171,36 @@ const comments = ref([])
 const route = useRoute()
 const router = useRouter()
 
+const showDialog = ref(false)
+const showImageDialog = ref(false)
+const editField = ref('')
+const editValue = ref('')
+const currentPost = ref(null)
+const newImage = ref(null)
+
 const trenutniID = route.params.id
 
 const hasToken = computed(() => {
   return localStorage.getItem('token') !== null;
 });
+
 const getPosts = async () => {
-
   try {
-    const response = await api.get(`/natrakcije/${trenutniID}`, {
-
-    });
+    const response = await api.get(`/natrakcije/${trenutniID}`);
     posts.value = response.data ? [response.data] : []; // Ensure posts is always an array
   } catch (error) {
     console.error("Failed to fetch posts:", error);
   }
 };
 
-// Dodavanje slike
-const spremiSliku = async (link, id) => {
-  console.log("OnSubmit: ", link, id)
-
-  try {
-    const response = await api.put(`http://localhost:4200/dodajSliku/${id}`, {
-      slika: link
-    });
-    console.log(response.data);
-  } catch (error) {
-    console.log(error);
-  }
-  getPosts();
-}
-
 // Dodavanje ocjene za atrakciju
 const dodajOcjenu = async (ocjena, id) => {
   try {
-    console.log('Kliknuli ste na: ', ocjena, " ocjenu")
-    console.log("ID: ", id)
-
     const response = await api.put(`http://localhost:4200/dodajOcjenu/${id}`, {
       prosjecna_ocjena: ocjena
     });
-    console.log(response.data);
   } catch (error) {
     console.log(error);
-  }
-  getPosts();
-}
-
-const obrisi_sliku = async (id) => {
-  try {
-    const response = await api.delete(`http://localhost:4200/obrisi_sliku_atrakcije/${id}`);
-    console.log("LOG1: ", response.data);
-  } catch (error) {
-    console.log("LOG2: ", error);
   }
   getPosts();
 }
@@ -209,12 +208,65 @@ const obrisi_sliku = async (id) => {
 const deleteOcjena = async (id) => {
   try {
     const response = await api.delete(`http://localhost:4200/obrisi_ocjenu_atrakcije/${id}`);
-    console.log(response.data);
   } catch (error) {
     console.log(error);
   }
   getPosts();
 }
+
+const showEditDialog = (field, post) => {
+  editField.value = field
+  currentPost.value = post
+  editValue.value = post[field]
+  showDialog.value = true
+}
+
+const showEditImageDialog = (post) => {
+  currentPost.value = post
+  showImageDialog.value = true
+}
+
+const onFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      newImage.value = reader.result; // Spremi kao base64 string
+    };
+    reader.readAsDataURL(file); // Čita datoteku i pretvara u base64
+  }
+};
+
+
+
+const saveEdit = async () => {
+  if (currentPost.value) {
+    try {
+      const updateData = { [editField.value]: editValue.value }
+      const response = await api.put(`http://localhost:4200/updatePost/${currentPost.value.id_atrakcije}`, updateData);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Failed to update post:", error);
+    }
+    getPosts();
+  }
+}
+
+const saveImage = async () => {
+  if (currentPost.value && newImage.value) {
+    try {
+      const response = await api.put(`http://localhost:4200/updateImage/${currentPost.value.id_atrakcije}`, {
+        slika: newImage.value // Šaljemo base64 string
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error("Failed to update image:", error);
+    }
+    getPosts();
+  }
+};
+
+
 
 onMounted(async () => {
   await getPosts();

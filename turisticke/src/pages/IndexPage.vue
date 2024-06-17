@@ -141,11 +141,33 @@ export default {
 <style>
 .bg-blue {
   background-color: #1e90ff;
+  
   color: white;
 }
 
 .my-card {
   width: 100%;
   max-width: 300px;
+  min-height: 450px; 
+  max-height: 450px; 
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
 }
+
+.q-card-section {
+  position: relative; 
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.q-img {
+  width: 100%;  /* širina slike se prilagođava širini kartice */
+  height: 250px; /* fiksna visina */
+  object-fit: cover; /* osigurava da slika pokrije cijeli definirani prostor bez iskrivljenja */
+}
+
+
 </style>
+

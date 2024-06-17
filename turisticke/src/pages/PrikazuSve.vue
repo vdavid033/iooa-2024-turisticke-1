@@ -142,5 +142,24 @@ export default {
 .my-card {
   width: 100%;
   max-width: 300px;
+  min-height: 450px; 
+  max-height: 450px; 
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+}
+
+.q-card-section {
+  position: relative; 
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.q-img {
+  width: 100%;
+  height: 250px; /* Ako želite istu visinu kao na prvoj stranici */
+  object-fit: cover;
 }
 </style>
+
