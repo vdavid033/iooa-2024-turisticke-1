@@ -1,7 +1,7 @@
 <template>
   <div class="bg-image">
     <q-page padding class="flex flex-center">
-      <q-card style="width: 500px"> <!-- Increased width to accommodate the map -->
+      <q-card style="width: 500px"> 
         <q-card-section>
           <div class="q-gutter-md full-width" style="max-width: 500px">
             <div class="full-width">
@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     initMap() {
-      this.map = L.map('mapid').setView([45.9258, 16.0400], 3); // Center on Europe
+      this.map = L.map('mapid').setView([45.9258, 16.0400], 3); 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
       }).addTo(this.map);
@@ -170,6 +170,6 @@ export default {
 
 #mapid {
   height: 300px;
-  /* Set a fixed height for the map */
+  
 }
 </style>

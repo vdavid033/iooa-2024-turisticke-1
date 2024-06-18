@@ -1,6 +1,6 @@
 <template>
   <div class="registration-form">
-      <h2 class="form-title">Prijava</h2> <!-- Dodajemo naslov forme -->
+      <h2 class="form-title">Prijava</h2> 
     <input type="text" v-model="korisnicko_ime" placeholder="Korisnicko ime" class="input-field">
     <input type="password" v-model="lozinka" placeholder="Lozinka" class="input-field">
     <button @click="login" class="submit-btn">Prijava</button>
@@ -30,11 +30,11 @@ export default {
         });
 
         if (response.data.success) {
-          // Save the JWT token to local storage
+          
           localStorage.setItem("token", response.data.token);
           this.$router.push('/');
         } else {
-          // Show error message if login fails
+          
           this.$q.notify({
             color: "negative",
             position: "top",

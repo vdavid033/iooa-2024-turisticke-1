@@ -85,7 +85,7 @@
       </div>
     </div>
 
-    <!-- Add map container -->
+    
     <div id="mapid" style="height: 500px; margin: 20px;"></div>
 
     <q-card-section>
@@ -103,7 +103,7 @@
     <div class="q-pa-md row items-start q-gutter-xs">
       <p style="font-size: 20px; color: white">Ovdje možete pogledati komentare o atrakciji</p>
     </div>
-    <!-- {{ comments }} -->
+    
     <div class="q-pa-md row items-start q-gutter-md">
       <q-card v-for="item in comments" :key="item" class="my-card" flat bordered>
         <q-item>
@@ -125,7 +125,7 @@
       </q-card>
     </div>
 
-    <!-- Edit Dialog -->
+    
     <q-dialog v-model="showDialog">
       <q-card>
         <q-card-section>
@@ -141,7 +141,7 @@
       </q-card>
     </q-dialog>
 
-    <!-- Dialog za promjenu slike -->
+    
     <q-dialog v-model="showImageDialog">
       <q-card>
         <q-card-section>
@@ -163,17 +163,19 @@
 import { ref, onMounted, computed } from "vue"
 import { api } from 'boot/axios'
 import { useRoute, useRouter } from 'vue-router';
-import L from 'leaflet'; // Import Leaflet
-import 'leaflet/dist/leaflet.css'; // Import Leaflet CSS
-import { jwtDecode } from "jwt-decode"; // Assume this library is already installed
+import L from 'leaflet'; 
+import 'leaflet/dist/leaflet.css'; 
+import { jwtDecode } from "jwt-decode"; 
 
 const posts = ref([])
 const token = localStorage.getItem('token');
-let loggedInUserId = 0; // Set default to 0
+let loggedInUserId = 0; 
+
+
 
 if (token) {
   const decoded = jwtDecode(token);
-  loggedInUserId = decoded.id; // Adjust this to match the key in your token payload where the user ID is stored
+  loggedInUserId = decoded.id; 
 }
 // Adjust this according to your token structure
 
@@ -202,34 +204,39 @@ const hasToken = computed(() => {
 const getPosts = async () => {
   try {
     const response = await api.get(`/natrakcije/${trenutniID}`);
-    posts.value = response.data ? [response.data] : []; // Ensure posts is always an array
+    posts.value = response.data ? [response.data] : []; 
   } catch (error) {
     console.error("Failed to fetch posts:", error);
   }
 };
 
-// Dodavanje ocjene za atrakciju
+
+
+
 const dodajOcjenu = async (ocjena, id) => {
   try {
     console.log('Kliknuli ste na: ', ocjena, " ocjenu");
     console.log("ID: ", id);
 
-    // Retrieve the token from localStorage
+    
     const token = localStorage.getItem('token');
 
-    // Decoding the JWT to extract user information
+    
     const decoded = jwtDecode(token);
-    const userId = decoded.id;  // Assuming 'id' is the key containing the user ID in your JWT payload
+    const userId = decoded.id;  
 
-    // Log the user ID to console
+    
     console.log("User ID extracted from token:", userId);
+
+   
+
 
     const response = await api.put(`http://localhost:4200/dodajOcjenu/${id}`, {
       prosjecna_ocjena: ocjena,
-      id_korisnika: userId  // Sending the user ID to the backend
+      id_korisnika: userId  
     }, {
       headers: {
-        Authorization: `Bearer ${token}`  // Sending token in the Authorization header
+        Authorization: `Bearer ${token}`  
       }
     });
 
@@ -279,9 +286,9 @@ const onFileChange = (e) => {
   if (file) {
     const reader = new FileReader();
     reader.onload = () => {
-      newImage.value = reader.result; // Spremi kao base64 string
+      newImage.value = reader.result; 
     };
-    reader.readAsDataURL(file); // Čita datoteku i pretvara u base64
+    reader.readAsDataURL(file); 
   }
 };
 
@@ -304,7 +311,7 @@ const saveImage = async () => {
   if (currentPost.value && newImage.value) {
     try {
       const response = await api.put(`http://localhost:4200/updateImage/${currentPost.value.id_atrakcije}`, {
-        slika: newImage.value // Šaljemo base64 string
+        slika: newImage.value 
       });
       console.log(response.data);
     } catch (error) {
@@ -331,9 +338,9 @@ const getComments = async () => {
   }
 };
 
-// Initialize map
+
 const initMap = () => {
-  const map = L.map('mapid').setView([45.9258, 16.0400], 3); // Center on Europe
+  const map = L.map('mapid').setView([45.9258, 16.0400], 3); 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
   }).addTo(map);
@@ -345,21 +352,21 @@ const initMap = () => {
     popupAnchor: [-3, -76]
   });
 
-  // Set marker based on post data
+  
   if (posts.value.length > 0) {
     const post = posts.value[0];
     const lat = post.geografska_sirina;
     const lng = post.geografska_duzina;
     const marker = L.marker([lat, lng], { icon }).addTo(map);
 
-    // Center and zoom the map to the marker
-    map.setView([lat, lng], 13); // Adjust the zoom level as needed
+    
+    map.setView([lat, lng], 13); 
   }
 
-  // Handle click event on the map
+  
   map.on('click', (e) => {
     const { lat, lng } = e.latlng;
-    // Update lat/lng based on map click if necessary
+    
   });
 }
 </script>
@@ -377,6 +384,8 @@ const initMap = () => {
   max-width: 620px;
   word-wrap: break-word;
 }
+
+
 
 .button {
   background-color: black;

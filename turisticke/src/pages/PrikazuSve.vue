@@ -61,7 +61,7 @@
 <script>
 import { ref, onMounted } from "vue";
 import { api } from "boot/axios";
-import { jwtDecode   } from "jwt-decode"; // Assume this library is already installed
+import { jwtDecode   } from "jwt-decode"; 
 
 export default {
   setup() {
@@ -91,7 +91,7 @@ export default {
       try {
         const confirmation = window.confirm("Jeste li sigurni da želite izbrisati atrakciju?");
         if (!confirmation) {
-          return; // If the user cancels, do nothing
+          return; 
         }
 
         const token = localStorage.getItem("token");
@@ -100,7 +100,7 @@ export default {
           return;
         }
 
-        // Decode the JWT token to get user details
+        
         const decodedToken = jwtDecode(token);
         const id_korisnika = decodedToken.id;
         const uloga = decodedToken.uloga;
@@ -110,14 +110,14 @@ export default {
             Authorization: `Bearer ${token}`
           },
           params: {
-            id_korisnika, // Pass the user ID to the backend
+            id_korisnika, 
             uloga
           }
         };
 
         const response = await api.delete(`http://localhost:4200/obrisi_atrakcije/${id_atrakcije}`, config);
-        getPosts(); // Refresh the attraction list after deletion
-        window.alert("Atrakcija je izbrisana."); // Display success message
+        getPosts(); 
+        window.alert("Atrakcija je izbrisana."); 
       } catch (error) {
         console.error("Failed to delete post:", error);
       }
@@ -142,23 +142,25 @@ export default {
 .my-card {
   width: 100%;
   max-width: 300px;
-  min-height: 450px; 
-  max-height: 450px; 
+  min-height: 450px;
+  max-height: 450px;
   display: flex;
   flex-direction: column;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .q-card-section {
-  position: relative; 
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.q-img {
+
+.my-card .q-img {
   width: 100%;
-  height: 250px; /* Ako želite istu visinu kao na prvoj stranici */
+  min-height: 200px;
+  max-height: 200px;
   object-fit: cover;
 }
 </style>

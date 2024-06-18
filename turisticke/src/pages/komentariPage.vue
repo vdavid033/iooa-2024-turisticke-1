@@ -28,7 +28,7 @@ const trenutniID = route.params.id;
 const message = ref('');
 const komentar = ref('');
 
-// Dodavanje komentara za atrakciju
+
 const dodajKomentar = async (komentar, trenutniID) => {
   try {
     const token = localStorage.getItem("token");
@@ -50,7 +50,7 @@ const dodajKomentar = async (komentar, trenutniID) => {
 
     console.log(response.data);
     message.value = 'Uspješno ste dodali komentar!';
-    // Vraćamo korisnika na prethodnu stranicu
+    
     nazadNaPrethodnu();
   } catch (error) {
     console.error(error);
@@ -68,12 +68,14 @@ const nazadNaPrethodnu = () => {
 
 <style scoped>
 .textarea {
-  width: 98%;
-  height: 120px;
-  margin-left: 5px;
-  margin-bottom: 10px;
-  padding-top: 25px;
-  background-color: rgb(155, 197, 194);
+  width: 100%;  /* Podesite širinu prema potrebi */
+  max-width: 600px;  /* Maksimalna širina okvira */
+  height: 100px;  /* Podesite visinu prema potrebi */
+  margin: 0 auto;  /* Centriranje okvira */
+  padding: 10px;  /* Unutarnji prostor unutar okvira */
+  background-color: rgb(155, 197, 194);  /* Boja pozadine */
+
+
 
 }
 

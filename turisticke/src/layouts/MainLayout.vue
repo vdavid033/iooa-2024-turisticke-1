@@ -38,7 +38,7 @@ const linksList = [
     link: "auth",
     target: "_self",
     requiresAuth: false,
-    hideOnAuth: true,  // Dodan novi atribut za skrivanje na autentikaciji
+    hideOnAuth: true,  
   },
   {
     title: "Sve atrakcije",
@@ -47,7 +47,7 @@ const linksList = [
     link: "/",
     target: "_self",
     requiresAuth: false,
-    hideOnAuth: false,  // Atribut za uvjetno skrivanje
+    hideOnAuth: false, 
   },
   {
     title: "Moje atrakcije",
